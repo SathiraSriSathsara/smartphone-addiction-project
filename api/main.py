@@ -12,6 +12,7 @@ from api.exceptions import register_exception_handlers
 from api.model_loader import ModelService
 from api.routes.health import router as health_router
 from api.routes.model import router as model_router
+from api.routes.prediction import router as prediction_router
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -69,6 +70,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     application.include_router(health_router)
     application.include_router(model_router)
+    application.include_router(prediction_router)
     return application
 
 
