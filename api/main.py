@@ -1,16 +1,35 @@
 """FastAPI application factory and entry point."""
 
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+from pathlib import Path
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.config import Settings, get_settings
 from api.exceptions import register_exception_handlers
+from api.model_loader import ModelService
 from api.routes.health import router as health_router
+from api.routes.model import router as model_router
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
-    """Create and configure the SmartHabit API without loading the ML model."""
+    """Create and configure the SmartHabit API and its startup model loader."""
     active_settings = settings or get_settings()
+
+    @asynccontextmanager
+    async def lifespan(application: FastAPI) -> AsyncIterator[None]:
+        if not hasattr(application.state, "model_service"):
+            environment_path = active_settings.metadata_path.parent / "environment.json"
+            application.state.model_service = ModelService(
+                model_path=active_settings.model_path,
+                metadata_path=active_settings.metadata_path,
+                environment_path=environment_path,
+                schema_path=Path("docs/model-schema.json"),
+            ).load()
+        yield
+
     application = FastAPI(
         title=active_settings.app_name,
         version=active_settings.app_version,
@@ -23,6 +42,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         openapi_url="/openapi.json",
         contact={"name": "SmartHabit Project"},
         license_info={"name": "Educational use"},
+        lifespan=lifespan,
     )
 
     application.add_middleware(
@@ -48,6 +68,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         }
 
     application.include_router(health_router)
+    application.include_router(model_router)
     return application
 
 
