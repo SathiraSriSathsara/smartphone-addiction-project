@@ -1,0 +1,3 @@
+Assessed body word count: 2940
+Method: headings, body text, table text, and figure captions counted; title pages, contents, references, and appendices excluded.
+Maximum: 4000 words.
