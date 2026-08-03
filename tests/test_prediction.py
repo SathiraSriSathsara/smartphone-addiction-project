@@ -146,3 +146,4 @@ def test_unexpected_model_error_returns_safe_500(client: TestClient) -> None:
     }
     assert "private" not in response.text.lower()
     assert "path" not in response.text.lower()
+    assert "x-request-id" in response.headers

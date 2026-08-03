@@ -8,7 +8,19 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("smarthabit.error")
+
+
+def _safe_error_headers(request: Request) -> dict[str, str]:
+    """Return headers that must survive framework-level 500 handling."""
+    return {
+        "X-Request-ID": getattr(request.state, "request_id", "unavailable"),
+        "X-Content-Type-Options": "nosniff",
+        "X-Frame-Options": "DENY",
+        "Referrer-Policy": "no-referrer",
+        "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+        "Cache-Control": "no-store",
+    }
 
 
 def _error_payload(
@@ -21,6 +33,18 @@ def _error_payload(
     if details is not None:
         error["details"] = details
     return {"error": error}
+
+
+def _safe_validation_details(exc: RequestValidationError) -> list[dict[str, Any]]:
+    """Expose actionable validation fields without echoing submitted values."""
+    return [
+        {
+            "loc": list(error.get("loc", ())),
+            "msg": error.get("msg", "Invalid value"),
+            "type": error.get("type", "value_error"),
+        }
+        for error in exc.errors()
+    ]
 
 
 async def http_exception_handler(
@@ -49,7 +73,7 @@ async def validation_exception_handler(
         content=_error_payload(
             "validation_error",
             "Request validation failed",
-            exc.errors(),
+            _safe_validation_details(exc),
         ),
     )
 
@@ -59,11 +83,15 @@ async def unexpected_exception_handler(
     exc: Exception,
 ) -> JSONResponse:
     """Log unexpected errors and return a safe generic response."""
-    logger.exception(
-        "Unhandled API error for %s %s",
-        request.method,
-        request.url.path,
-        exc_info=exc,
+    logger.error(
+        "unhandled_exception",
+        extra={
+            "request_id": getattr(request.state, "request_id", "unavailable"),
+            "method": request.method,
+            "path": request.url.path,
+            "status_code": 500,
+            "exception_type": type(exc).__name__,
+        },
     )
     return JSONResponse(
         status_code=500,
@@ -71,6 +99,7 @@ async def unexpected_exception_handler(
             "internal_server_error",
             "An unexpected server error occurred",
         ),
+        headers=_safe_error_headers(request),
     )
 
 

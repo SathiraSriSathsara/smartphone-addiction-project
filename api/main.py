@@ -9,6 +9,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from api.config import Settings, get_settings
 from api.exceptions import register_exception_handlers
+from api.logging_config import configure_logging
+from api.middleware import RequestBodyLimitMiddleware, RequestContextMiddleware
 from api.model_loader import ModelService
 from api.routes.health import router as health_router
 from api.routes.model import router as model_router
@@ -18,6 +20,7 @@ from api.routes.prediction import router as prediction_router
 def create_app(settings: Settings | None = None) -> FastAPI:
     """Create and configure the SmartHabit API and its startup model loader."""
     active_settings = settings or get_settings()
+    configure_logging()
 
     @asynccontextmanager
     async def lifespan(application: FastAPI) -> AsyncIterator[None]:
@@ -49,9 +52,17 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     application.add_middleware(
         CORSMiddleware,
         allow_origins=active_settings.allowed_origins_list,
-        allow_credentials=True,
+        allow_credentials=False,
         allow_methods=["GET", "POST", "OPTIONS"],
-        allow_headers=["Accept", "Authorization", "Content-Type"],
+        allow_headers=["Accept", "Content-Type"],
+    )
+    application.add_middleware(
+        RequestBodyLimitMiddleware,
+        max_bytes=active_settings.max_request_body_bytes,
+    )
+    application.add_middleware(
+        RequestContextMiddleware,
+        environment=active_settings.environment,
     )
     register_exception_handlers(application)
 

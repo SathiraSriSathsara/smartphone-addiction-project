@@ -2,8 +2,9 @@
 
 from functools import lru_cache
 from pathlib import Path
+from urllib.parse import urlsplit
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -25,6 +26,12 @@ class Settings(BaseSettings):
         default="http://localhost:5500,http://127.0.0.1:5500",
         validation_alias="ALLOWED_ORIGINS",
     )
+    max_request_body_bytes: int = Field(
+        default=16_384,
+        ge=1_024,
+        le=1_048_576,
+        validation_alias="MAX_REQUEST_BODY_BYTES",
+    )
 
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -40,6 +47,28 @@ class Settings(BaseSettings):
             for origin in self.allowed_origins.split(",")
             if origin.strip()
         ]
+
+    @field_validator("allowed_origins")
+    @classmethod
+    def validate_allowed_origins(cls, value: str) -> str:
+        """Reject wildcards and malformed origins before CORS is configured."""
+        origins = [origin.strip() for origin in value.split(",") if origin.strip()]
+        if not origins:
+            raise ValueError("ALLOWED_ORIGINS must contain at least one origin")
+        for origin in origins:
+            parsed = urlsplit(origin)
+            if (
+                origin == "*"
+                or parsed.scheme not in {"http", "https"}
+                or not parsed.netloc
+                or parsed.path not in {"", "/"}
+                or parsed.query
+                or parsed.fragment
+            ):
+                raise ValueError(
+                    "ALLOWED_ORIGINS must contain explicit HTTP(S) origins"
+                )
+        return ",".join(origins)
 
 
 @lru_cache
