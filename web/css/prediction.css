@@ -181,6 +181,8 @@
   color: #fff;
 }
 
+.sidebar__pages{display:flex;flex-wrap:wrap;gap:.25rem;margin-top:1rem}.sidebar__pages a{padding:.3rem .45rem;border-radius:.4rem;color:#9fa9c3;font-size:.67rem;font-weight:750;text-decoration:none}.sidebar__pages a:hover,.sidebar__pages a[aria-current=page]{background:rgba(255,255,255,.08);color:#fff}
+
 .workspace {
   width: min(100%, 96rem);
   margin-inline: auto;

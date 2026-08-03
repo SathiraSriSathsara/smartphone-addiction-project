@@ -37,12 +37,14 @@
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto 1fr auto auto;
   width: min(100%, var(--content-width));
   min-height: 100svh;
   margin-inline: auto;
   padding: clamp(1.5rem, 4vw, 3.5rem) clamp(1.25rem, 5.5vw, 5rem) clamp(2rem, 4vw, 3.5rem);
 }
+
+.landing__links{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:1.5rem}.landing__links a{padding:.4rem .65rem;border-radius:999px;color:var(--color-mist);font-size:.76rem;font-weight:750;text-decoration:none}.landing__links a:hover,.landing__links a[aria-current=page]{background:rgba(255,255,255,.1);color:var(--color-white)}
 
 .brand {
   position: relative;
