@@ -16,7 +16,8 @@ router = APIRouter(prefix="/api", tags=["Prediction"])
     summary="Predict smartphone-addiction likelihood",
     description=(
         "Returns an educational model estimate. This is not a medical or "
-        "psychological diagnosis."
+        "psychological diagnosis. When available, up to five local TreeSHAP "
+        "model influences are returned as non-causal directional factors."
     ),
 )
 def predict(

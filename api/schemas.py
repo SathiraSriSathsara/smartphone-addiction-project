@@ -62,6 +62,28 @@ class PredictionRequest(BaseModel):
     academic_work_impact: Literal["No", "Yes"]
 
 
+class ExplanationFactor(BaseModel):
+    """One readable local model influence in raw-score space."""
+
+    feature: str
+    direction: Literal[
+        "increases_predicted_risk",
+        "decreases_predicted_risk",
+    ]
+    display_magnitude: Annotated[float, Field(ge=0.0, le=100.0)]
+
+
+class PredictionExplanation(BaseModel):
+    """Local explanation or a safe non-blocking fallback."""
+
+    status: Literal["available", "unavailable"]
+    label: str
+    method: str | None
+    factors: Annotated[list[ExplanationFactor], Field(max_length=5)]
+    limitation: str
+    message: str | None
+
+
 class PredictionResponse(BaseModel):
     """Educational model prediction returned to API clients."""
 
@@ -72,3 +94,4 @@ class PredictionResponse(BaseModel):
     risk_message: str
     model_version: str | None
     disclaimer: str
+    explanation: PredictionExplanation

@@ -5,6 +5,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
+from api.explainer import generate_local_explanation
 from api.model_loader import ModelService
 from api.schemas import PredictionRequest, PredictionResponse
 from src.feature_engineering import add_domain_features
@@ -78,6 +79,7 @@ def predict_addiction(
         predicted_class = predicted_class.item()
 
     risk_level = risk_level_for_probability(addiction_probability)
+    explanation = generate_local_explanation(service.model, engineered_frame)
     return PredictionResponse(
         predicted_class=int(predicted_class),
         addiction_probability=addiction_probability,
@@ -86,4 +88,5 @@ def predict_addiction(
         risk_message=RISK_MESSAGES[risk_level],
         model_version=service.metadata.get("model_version"),
         disclaimer=DISCLAIMER,
+        explanation=explanation,
     )

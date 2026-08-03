@@ -192,6 +192,7 @@ function renderResult(result) {
   document.querySelector("#result-non-addiction").textContent = view.nonAddictionLabel;
   document.querySelector("#result-model-version").textContent = view.modelVersion;
   document.querySelector("#result-disclaimer").textContent = result.disclaimer;
+  renderExplanation(result.explanation);
   for (const card of document.querySelectorAll(".risk-info-card")) {
     const isCurrent = card.dataset.risk === view.riskLevel;
     card.classList.toggle("is-current", isCurrent);
@@ -205,6 +206,59 @@ function renderResult(result) {
   elements.result.hidden = false;
   elements.result.focus();
   elements.result.scrollIntoView({ behavior: reducedMotion() ? "auto" : "smooth", block: "nearest" });
+}
+
+function renderExplanation(explanation) {
+  const factorsList = document.querySelector("#explanation-factors");
+  const fallback = document.querySelector("#explanation-fallback");
+  const limitation = document.querySelector("#explanation-limitation");
+  factorsList.replaceChildren();
+  limitation.textContent = explanation?.limitation || (
+    "Model influences are directional and non-causal; magnitudes are not percentages."
+  );
+
+  if (explanation?.status !== "available" || !explanation.factors?.length) {
+    fallback.textContent = explanation?.message || (
+      "A local model explanation is unavailable for this result."
+    );
+    fallback.hidden = false;
+    return;
+  }
+
+  fallback.hidden = true;
+  const fragment = document.createDocumentFragment();
+  for (const factor of explanation.factors.slice(0, 5)) {
+    const item = document.createElement("li");
+    item.className = "explanation-factor";
+    item.dataset.direction = factor.direction;
+
+    const row = document.createElement("div");
+    row.className = "explanation-factor__row";
+    const name = document.createElement("span");
+    name.className = "explanation-factor__name";
+    name.textContent = factor.feature;
+    const direction = document.createElement("span");
+    direction.className = "explanation-factor__direction";
+    direction.textContent = factor.direction === "increases_predicted_risk"
+      ? "Toward higher estimate"
+      : "Toward lower estimate";
+    row.append(name, direction);
+
+    const track = document.createElement("div");
+    track.className = "explanation-factor__track";
+    track.setAttribute("role", "img");
+    track.setAttribute(
+      "aria-label",
+      `${factor.feature}: relative display magnitude ${factor.display_magnitude} out of 100; ${direction.textContent}`,
+    );
+    const bar = document.createElement("span");
+    bar.className = "explanation-factor__bar";
+    bar.style.setProperty("--factor-magnitude", `${factor.display_magnitude}%`);
+    track.append(bar);
+    item.append(row, track);
+    fragment.append(item);
+  }
+  factorsList.append(fragment);
 }
 
 function createResultViewModel(result) {

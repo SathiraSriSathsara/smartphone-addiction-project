@@ -112,6 +112,7 @@ def test_real_model_prediction_response(client: TestClient) -> None:
         "risk_message",
         "model_version",
         "disclaimer",
+        "explanation",
     }
     assert 0.0 <= payload["addiction_probability"] <= 1.0
     assert 0.0 <= payload["non_addiction_probability"] <= 1.0

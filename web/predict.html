@@ -185,6 +185,24 @@
               </div>
             </dl>
 
+            <section class="explanation" aria-labelledby="explanation-heading">
+              <div class="explanation__heading">
+                <span aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M12 3a7 7 0 0 0-4 12.7V19h8v-3.3A7 7 0 0 0 12 3Z"></path>
+                    <path d="M9 22h6M9 16h6"></path>
+                  </svg>
+                </span>
+                <div>
+                  <h4 id="explanation-heading">Model factors influencing this prediction</h4>
+                  <p>Local model influences, not causes or percentage contributions.</p>
+                </div>
+              </div>
+              <ol id="explanation-factors" class="explanation__factors"></ol>
+              <p id="explanation-fallback" class="explanation__fallback" hidden></p>
+              <p id="explanation-limitation" class="explanation__limitation"></p>
+            </section>
+
             <section class="risk-guide" aria-labelledby="risk-guide-heading">
               <div class="risk-guide__heading">
                 <h4 id="risk-guide-heading">Risk display thresholds</h4>
