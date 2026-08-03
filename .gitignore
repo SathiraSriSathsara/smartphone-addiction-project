@@ -19,8 +19,8 @@ __pycache__/
 htmlcov/
 
 # Large/raw Kaggle data
-data/
 *.zip
+mnt/
 
 # Temporary and editor files
 *.tmp
