@@ -1,0 +1,186 @@
+{
+  "schema_version": "1.0.0",
+  "target": {
+    "name": "addicted_label",
+    "classes": [
+      0,
+      1
+    ],
+    "positive_class": 1,
+    "positive_class_probability_index": 1
+  },
+  "excluded_fields": [
+    {
+      "name": "id",
+      "reason": "Kaggle row identifier; not a prediction feature"
+    }
+  ],
+  "input_fields": [
+    {
+      "name": "age",
+      "type": "number",
+      "required": true,
+      "allowed_categories": null
+    },
+    {
+      "name": "daily_screen_time_hours",
+      "type": "number",
+      "required": true,
+      "allowed_categories": null
+    },
+    {
+      "name": "social_media_hours",
+      "type": "number",
+      "required": true,
+      "allowed_categories": null
+    },
+    {
+      "name": "gaming_hours",
+      "type": "number",
+      "required": true,
+      "allowed_categories": null
+    },
+    {
+      "name": "work_study_hours",
+      "type": "number",
+      "required": true,
+      "allowed_categories": null
+    },
+    {
+      "name": "sleep_hours",
+      "type": "number",
+      "required": true,
+      "allowed_categories": null
+    },
+    {
+      "name": "notifications_per_day",
+      "type": "number",
+      "required": true,
+      "allowed_categories": null
+    },
+    {
+      "name": "app_opens_per_day",
+      "type": "number",
+      "required": true,
+      "allowed_categories": null
+    },
+    {
+      "name": "weekend_screen_time",
+      "type": "number",
+      "required": true,
+      "allowed_categories": null
+    },
+    {
+      "name": "gender",
+      "type": "string",
+      "required": true,
+      "allowed_categories": [
+        "Female",
+        "Male",
+        "Other"
+      ]
+    },
+    {
+      "name": "stress_level",
+      "type": "string",
+      "required": true,
+      "allowed_categories": [
+        "High",
+        "Low",
+        "Medium"
+      ]
+    },
+    {
+      "name": "academic_work_impact",
+      "type": "string",
+      "required": true,
+      "allowed_categories": [
+        "No",
+        "Yes"
+      ]
+    }
+  ],
+  "engineered_fields": [
+    {
+      "name": "social_media_ratio",
+      "type": "number",
+      "required_from_user": false,
+      "required_by_saved_pipeline": true,
+      "formula": "social_media_hours / daily_screen_time_hours",
+      "zero_denominator_handling": "Replace a zero denominator with a missing value before division"
+    },
+    {
+      "name": "gaming_ratio",
+      "type": "number",
+      "required_from_user": false,
+      "required_by_saved_pipeline": true,
+      "formula": "gaming_hours / daily_screen_time_hours",
+      "zero_denominator_handling": "Replace a zero denominator with a missing value before division"
+    },
+    {
+      "name": "notifications_per_screen_hour",
+      "type": "number",
+      "required_from_user": false,
+      "required_by_saved_pipeline": true,
+      "formula": "notifications_per_day / daily_screen_time_hours",
+      "zero_denominator_handling": "Replace a zero denominator with a missing value before division"
+    },
+    {
+      "name": "sleep_deficit_from_8h",
+      "type": "number",
+      "required_from_user": false,
+      "required_by_saved_pipeline": true,
+      "formula": "abs(sleep_hours - 8)"
+    }
+  ],
+  "saved_pipeline_feature_order": [
+    "age",
+    "daily_screen_time_hours",
+    "social_media_hours",
+    "gaming_hours",
+    "work_study_hours",
+    "sleep_hours",
+    "notifications_per_day",
+    "app_opens_per_day",
+    "weekend_screen_time",
+    "gender",
+    "stress_level",
+    "academic_work_impact",
+    "social_media_ratio",
+    "gaming_ratio",
+    "notifications_per_screen_hour",
+    "sleep_deficit_from_8h"
+  ],
+  "numeric_features": [
+    "age",
+    "daily_screen_time_hours",
+    "social_media_hours",
+    "gaming_hours",
+    "work_study_hours",
+    "sleep_hours",
+    "notifications_per_day",
+    "app_opens_per_day",
+    "weekend_screen_time",
+    "social_media_ratio",
+    "gaming_ratio",
+    "notifications_per_screen_hour",
+    "sleep_deficit_from_8h"
+  ],
+  "categorical_features": [
+    "gender",
+    "stress_level",
+    "academic_work_impact"
+  ],
+  "missing_value_behavior": {
+    "numeric": "Median imputation inside the saved pipeline",
+    "categorical": "Most-frequent imputation inside the saved pipeline",
+    "unknown_categories": "Ignored by OneHotEncoder(handle_unknown='ignore')",
+    "request_policy": "All 12 raw fields are marked required for the future application schema; nullability and numeric bounds are not specified by the model metadata"
+  },
+  "evidence": {
+    "feature_names_and_order": "Loaded pipeline feature_names_in_",
+    "categories": "Fitted OneHotEncoder categories_",
+    "types": "Training/test CSV dtypes and fitted pipeline selectors",
+    "feature_engineering": "Notebook add_domain_features function (cell 23)"
+  }
+}
