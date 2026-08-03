@@ -6,6 +6,7 @@ from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from api.config import Settings, get_settings
 from api.exceptions import register_exception_handlers
@@ -66,22 +67,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     register_exception_handlers(application)
 
-    @application.get(
-        "/",
-        tags=["Application"],
-        summary="Get application information",
-    )
-    def root() -> dict[str, str]:
-        """Return public application metadata and the Swagger UI path."""
-        return {
-            "name": active_settings.app_name,
-            "version": active_settings.app_version,
-            "docs_url": application.docs_url or "/docs",
-        }
-
     application.include_router(health_router)
     application.include_router(model_router)
     application.include_router(prediction_router)
+    application.mount(
+        "/",
+        StaticFiles(directory=Path("web"), html=True),
+        name="web",
+    )
     return application
 
 

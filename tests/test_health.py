@@ -7,18 +7,16 @@ from fastapi.testclient import TestClient
 from api.config import get_settings
 
 
-def test_root_endpoint_returns_public_application_metadata(
+def test_root_endpoint_serves_landing_page(
     client: TestClient,
 ) -> None:
-    """The root endpoint identifies the app and links to Swagger documentation."""
+    """The single-port application serves the public landing page at root."""
     response = client.get("/")
 
     assert response.status_code == 200
-    assert response.json() == {
-        "name": get_settings().app_name,
-        "version": get_settings().app_version,
-        "docs_url": "/docs",
-    }
+    assert response.headers["content-type"].startswith("text/html")
+    assert "Understand Today" in response.text
+    assert "SmartHabit" in response.text
 
 
 def test_health_endpoint_returns_status_and_timestamp(client: TestClient) -> None:

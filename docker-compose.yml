@@ -1,0 +1,23 @@
+services:
+  smarthabit:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: smarthabit:1.0.0
+    ports:
+      - "8000:8000"
+    environment:
+      APP_NAME: SmartHabit API
+      APP_VERSION: 1.0.0
+      ENVIRONMENT: production
+      MODEL_PATH: models/smartphone_addiction_model.joblib
+      METADATA_PATH: models/model_metadata.json
+      ALLOWED_ORIGINS: http://localhost:8000,http://127.0.0.1:8000
+      MAX_REQUEST_BODY_BYTES: "16384"
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
