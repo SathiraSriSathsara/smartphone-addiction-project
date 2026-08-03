@@ -1,0 +1,55 @@
+{
+  "competition": "Playground Series Season 6 Episode 8",
+  "target_column": "addicted_label",
+  "id_column": "id",
+  "feature_columns": [
+    "age",
+    "daily_screen_time_hours",
+    "social_media_hours",
+    "gaming_hours",
+    "work_study_hours",
+    "sleep_hours",
+    "notifications_per_day",
+    "app_opens_per_day",
+    "weekend_screen_time",
+    "gender",
+    "stress_level",
+    "academic_work_impact",
+    "social_media_ratio",
+    "gaming_ratio",
+    "notifications_per_screen_hour",
+    "sleep_deficit_from_8h"
+  ],
+  "numeric_columns": [
+    "age",
+    "daily_screen_time_hours",
+    "social_media_hours",
+    "gaming_hours",
+    "work_study_hours",
+    "sleep_hours",
+    "notifications_per_day",
+    "app_opens_per_day",
+    "weekend_screen_time",
+    "social_media_ratio",
+    "gaming_ratio",
+    "notifications_per_screen_hour",
+    "sleep_deficit_from_8h"
+  ],
+  "categorical_columns": [
+    "gender",
+    "stress_level",
+    "academic_work_impact"
+  ],
+  "engineered_features": [
+    "social_media_ratio",
+    "gaming_ratio",
+    "notifications_per_screen_hour",
+    "sleep_deficit_from_8h"
+  ],
+  "selected_model": "LightGBM",
+  "official_metric": "roc_auc",
+  "random_state": 42,
+  "training_rows": 691369,
+  "training_columns": 16,
+  "final_training_seconds": 62.74663327400003
+}

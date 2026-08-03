@@ -1,0 +1,12 @@
+{
+  "file": "/content/drive/MyDrive/smartphone-addiction-project/outputs/submissions/submission_lightgbm.csv",
+  "rows": 296302,
+  "columns": [
+    "id",
+    "addicted_label"
+  ],
+  "prediction_min": 0.0007128251615279301,
+  "prediction_max": 0.9999929514022293,
+  "prediction_mean": 0.709304009965153,
+  "all_checks_passed": true
+}

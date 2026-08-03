@@ -1,0 +1,12 @@
+feature,value,count
+gender,Male,223662
+gender,Female,221595
+gender,Other,217078
+gender,nan,29034
+stress_level,High,220873
+stress_level,Low,207783
+stress_level,Medium,207565
+stress_level,nan,55148
+academic_work_impact,Yes,330566
+academic_work_impact,No,316579
+academic_work_impact,nan,44224

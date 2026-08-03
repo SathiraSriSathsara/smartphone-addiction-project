@@ -1,0 +1,9 @@
+{
+  "train_rows": 691369,
+  "train_columns": 14,
+  "test_rows": 296302,
+  "test_columns": 13,
+  "target": "addicted_label",
+  "id_column": "id",
+  "duplicate_rows": 0
+}

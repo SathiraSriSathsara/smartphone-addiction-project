@@ -1,0 +1,15 @@
+,data_type,missing_count,missing_percentage,unique_values
+social_media_hours,float64,133995,19.381111967704655,722
+gaming_hours,float64,126821,18.343460583277526,402
+weekend_screen_time,float64,112063,16.20885518442395,1438
+daily_screen_time_hours,float64,95854,13.864376331597164,1390
+app_opens_per_day,float64,80710,11.67393967620764,167
+notifications_per_day,float64,67584,9.77538767286355,232
+stress_level,object,55148,7.976637656591487,4
+work_study_hours,float64,51518,7.451592420256042,601
+sleep_hours,float64,44480,6.433612152121371,452
+academic_work_impact,object,44224,6.396584168512039,3
+gender,object,29034,4.199494047317713,4
+age,float64,28929,4.184306788415448,19
+id,int64,0,0.0,691369
+addicted_label,int64,0,0.0,2
