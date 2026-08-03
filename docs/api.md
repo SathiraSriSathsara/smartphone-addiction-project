@@ -1,0 +1,275 @@
+# SmartHabit API reference
+
+## Base URL and conventions
+
+Local base URL: `http://127.0.0.1:8000`
+
+- JSON endpoints use `application/json`.
+- Every HTTP response includes a server-generated `X-Request-ID` UUID.
+- API responses use `Cache-Control: no-store`.
+- The default maximum request body is 16,384 bytes.
+- Interactive OpenAPI documentation is available at `/docs`; ReDoc is at `/redoc`; the OpenAPI document is at `/openapi.json`.
+
+## Endpoint summary
+
+| Method | Path | Purpose |
+|---|---|---|
+| GET | `/` | Serve the static landing page |
+| GET | `/api/health` | Report API process health and public runtime fields |
+| GET | `/api/model/info` | Return an allow-listed model metadata subset |
+| GET | `/api/model/schema` | Return raw frontend input fields and categories |
+| POST | `/api/predict` | Validate inputs and return a probability, risk band, and local explanation |
+
+Static pages such as `/predict.html`, `/about.html`, `/model.html`, and `/disclaimer.html` are served from `web/` by FastAPI's static mount.
+
+## GET `/`
+
+Returns `web/index.html` as `text/html`. It does not return model or environment information.
+
+```bash
+curl --fail http://127.0.0.1:8000/
+```
+
+Successful status: `200`.
+
+## GET `/api/health`
+
+Reports application availability. It does not perform a fresh model prediction.
+
+```bash
+curl --fail http://127.0.0.1:8000/api/health
+```
+
+Example `200` response (timestamp varies):
+
+```json
+{
+  "status": "healthy",
+  "environment": "development",
+  "version": "1.0.0",
+  "timestamp": "2026-08-04T04:00:00+00:00"
+}
+```
+
+## GET `/api/model/info`
+
+Returns only approved model metadata. Filesystem paths, dependency details, and the model object are not exposed.
+
+```bash
+curl --fail http://127.0.0.1:8000/api/model/info
+```
+
+Verified `200` response:
+
+```json
+{
+  "model_name": "LightGBM",
+  "model_version": null,
+  "competition": "Playground Series Season 6 Episode 8",
+  "target": "addicted_label",
+  "feature_count": 16,
+  "official_metric": "roc_auc",
+  "training_row_count": 691369
+}
+```
+
+`model_version` is `null` because `models/model_metadata.json` does not record one.
+
+## GET `/api/model/schema`
+
+Supplies the frontend's exact raw-input contract. The Kaggle `id` field and the four server-generated fields are excluded.
+
+```bash
+curl --fail http://127.0.0.1:8000/api/model/schema
+```
+
+Response structure:
+
+```json
+{
+  "schema_version": "1.0.0",
+  "fields": [
+    {
+      "name": "age",
+      "type": "number",
+      "required": true,
+      "allowed_categories": null
+    },
+    {
+      "name": "gender",
+      "type": "string",
+      "required": true,
+      "allowed_categories": ["Female", "Male", "Other"]
+    }
+  ]
+}
+```
+
+The actual response contains all 12 fields listed below.
+
+## POST `/api/predict`
+
+Flow: validated JSON → one-row DataFrame → shared feature engineering → saved preprocessing/model pipeline → `predict_proba` → local LightGBM contributions.
+
+### Request fields
+
+All fields are required. Numbers must be finite. Extra fields are forbidden.
+
+| Field | Type | Accepted values |
+|---|---|---|
+| `age` | number | 18.0–35.0 |
+| `daily_screen_time_hours` | number | 0.5–15.0 |
+| `social_media_hours` | number | 0.0–8.0 |
+| `gaming_hours` | number | 0.0–4.0 |
+| `work_study_hours` | number | 0.0–6.0 |
+| `sleep_hours` | number | 4.5–9.0 |
+| `notifications_per_day` | number | 20.0–250.0 |
+| `app_opens_per_day` | number | 15.0–180.0 |
+| `weekend_screen_time` | number | 0.51–17.56 |
+| `gender` | string | `Female`, `Male`, `Other` |
+| `stress_level` | string | `High`, `Low`, `Medium` |
+| `academic_work_impact` | string | `No`, `Yes` |
+
+### Request example
+
+```json
+{
+  "age": 26.0,
+  "daily_screen_time_hours": 7.4,
+  "social_media_hours": 1.82,
+  "gaming_hours": 2.68,
+  "work_study_hours": 2.62,
+  "sleep_hours": 8.25,
+  "notifications_per_day": 50.0,
+  "app_opens_per_day": 119.0,
+  "weekend_screen_time": 5.84,
+  "gender": "Other",
+  "stress_level": "Medium",
+  "academic_work_impact": "Yes"
+}
+```
+
+```bash
+curl --fail --request POST http://127.0.0.1:8000/api/predict \
+  --header "Content-Type: application/json" \
+  --data '{"age":26.0,"daily_screen_time_hours":7.4,"social_media_hours":1.82,"gaming_hours":2.68,"work_study_hours":2.62,"sleep_hours":8.25,"notifications_per_day":50.0,"app_opens_per_day":119.0,"weekend_screen_time":5.84,"gender":"Other","stress_level":"Medium","academic_work_impact":"Yes"}'
+```
+
+### Verified response example
+
+This response was produced by the saved model for the request above. Explanation generation can safely fall back to `unavailable`.
+
+```json
+{
+  "predicted_class": 0,
+  "addiction_probability": 0.09928293860835534,
+  "non_addiction_probability": 0.9007170613916446,
+  "risk_level": "Low",
+  "risk_message": "The model detected a low predicted likelihood based on the supplied usage pattern.",
+  "model_version": null,
+  "disclaimer": "This result is generated by an educational machine-learning model and is not a medical or psychological diagnosis.",
+  "explanation": {
+    "status": "available",
+    "label": "Model factors influencing this prediction",
+    "method": "LightGBM native TreeSHAP contributions",
+    "factors": [
+      {
+        "feature": "Weekend screen time",
+        "direction": "decreases_predicted_risk",
+        "display_magnitude": 100.0
+      },
+      {
+        "feature": "Daily screen time",
+        "direction": "decreases_predicted_risk",
+        "display_magnitude": 39.8
+      },
+      {
+        "feature": "Social media share of screen time",
+        "direction": "decreases_predicted_risk",
+        "display_magnitude": 19.6
+      },
+      {
+        "feature": "App opens per day",
+        "direction": "decreases_predicted_risk",
+        "display_magnitude": 17.8
+      },
+      {
+        "feature": "Notifications per day",
+        "direction": "increases_predicted_risk",
+        "display_magnitude": 16.7
+      }
+    ],
+    "limitation": "Directions describe this model output, not causes. Relative magnitudes are scaled against the strongest displayed factor and are not percentages.",
+    "message": null
+  }
+}
+```
+
+`factors` contains zero to five items. `display_magnitude` is a relative 0–100 visual scale, not a percentage cause or probability.
+
+### Risk display bands
+
+| Band | Rule |
+|---|---|
+| Low | probability `< 0.35` |
+| Moderate | `0.35 <= probability < 0.65` |
+| High | probability `>= 0.65` |
+
+These are application display thresholds, not clinical thresholds.
+
+## Validation and errors
+
+### Common envelope
+
+```json
+{
+  "error": {
+    "code": "error_code",
+    "message": "Safe public message"
+  }
+}
+```
+
+Validation errors add sanitized details:
+
+```json
+{
+  "error": {
+    "code": "validation_error",
+    "message": "Request validation failed",
+    "details": [
+      {
+        "loc": ["body", "sleep_hours"],
+        "msg": "Field required",
+        "type": "missing"
+      }
+    ]
+  }
+}
+```
+
+Submitted values, stack traces, package internals, model paths, and local filesystem paths are not returned.
+
+| Status | Meaning | Typical code |
+|---|---|---|
+| 200 | Successful request | n/a |
+| 400 | Malformed business/protocol request | `invalid_request` or `http_error` |
+| 404 | Route/static resource not found | `http_error` where handled by the API |
+| 413 | Request body exceeds configured maximum | `request_too_large` |
+| 422 | Missing, extra, wrong-type, non-finite, out-of-range, or invalid-category input | `validation_error` |
+| 500 | Unexpected server/model failure | `internal_server_error` |
+| 503 | Model singleton unavailable | `http_error` |
+
+## CORS and headers
+
+`ALLOWED_ORIGINS` is a comma-separated environment setting. Each value must be an explicit `http` or `https` origin; wildcard, path, query, fragment, and non-HTTP values fail configuration validation. Allowed methods are GET, POST, and OPTIONS. Allowed request headers are Accept and Content-Type. Credentials are disabled.
+
+Responses include:
+
+- `X-Request-ID`
+- `X-Content-Type-Options: nosniff`
+- `X-Frame-Options: DENY`
+- `Referrer-Policy: no-referrer`
+- restrictive `Permissions-Policy`
+- `Cache-Control: no-store` for `/api/` paths
+- HSTS when `ENVIRONMENT=production`
