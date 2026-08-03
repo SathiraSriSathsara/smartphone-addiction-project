@@ -1,0 +1,15 @@
+"""Shared pytest fixtures for API tests."""
+
+from collections.abc import Iterator
+
+import pytest
+from fastapi.testclient import TestClient
+
+from api.main import app
+
+
+@pytest.fixture
+def client() -> Iterator[TestClient]:
+    """Provide a test client with application lifespan handling."""
+    with TestClient(app) as test_client:
+        yield test_client

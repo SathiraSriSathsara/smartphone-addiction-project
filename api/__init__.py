@@ -1,0 +1,1 @@
+"""SmartHabit FastAPI application package."""
