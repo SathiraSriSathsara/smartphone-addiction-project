@@ -31,9 +31,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   elements.reset = document.querySelector("#reset-button");
   elements.result = document.querySelector("#result-card");
   elements.placeholder = document.querySelector("#result-placeholder");
+  elements.newAssessment = document.querySelector("#new-assessment-button");
 
   elements.form.addEventListener("submit", handleSubmit);
   elements.form.addEventListener("reset", handleReset);
+  elements.newAssessment.addEventListener("click", startNewAssessment);
 
   const api = new window.SmartHabitApiClient(window.SmartHabitConfig.apiBaseUrl);
   window.smartHabitApi = api;
@@ -173,21 +175,58 @@ function applyServerErrors(details) {
 }
 
 function renderResult(result) {
-  const percentage = Math.round(result.addiction_probability * 1000) / 10;
-  const nonAddiction = Math.round(result.non_addiction_probability * 1000) / 10;
+  const view = createResultViewModel(result);
+  const gauge = document.querySelector("#probability-gauge");
+  const gaugeProgress = document.querySelector("#probability-gauge-progress");
   const badge = document.querySelector("#result-risk-badge");
-  badge.textContent = `${result.risk_level} risk`;
-  badge.dataset.risk = result.risk_level;
-  document.querySelector("#result-probability").textContent = `${percentage}%`;
-  document.querySelector("#probability-ring").style.setProperty("--probability", `${percentage}%`);
-  document.querySelector("#result-message").textContent = result.risk_message;
-  document.querySelector("#result-class").textContent = String(result.predicted_class);
-  document.querySelector("#result-non-addiction").textContent = `${nonAddiction}%`;
+  badge.textContent = view.riskLabel;
+  badge.dataset.risk = view.riskLevel;
+  elements.result.dataset.risk = view.riskLevel;
+  document.querySelector("#result-probability").textContent = view.percentageLabel;
+  document.querySelector("#result-gauge-risk").textContent = view.riskLabel;
+  gauge.setAttribute("aria-valuenow", String(view.percentage));
+  gauge.setAttribute("aria-valuetext", view.gaugeText);
+  gaugeProgress.style.strokeDashoffset = String(view.strokeDashoffset);
+  document.querySelector("#result-message").textContent = view.message;
+  document.querySelector("#result-class").textContent = view.predictedClass;
+  document.querySelector("#result-non-addiction").textContent = view.nonAddictionLabel;
+  document.querySelector("#result-model-version").textContent = view.modelVersion;
   document.querySelector("#result-disclaimer").textContent = result.disclaimer;
+  for (const card of document.querySelectorAll(".risk-info-card")) {
+    const isCurrent = card.dataset.risk === view.riskLevel;
+    card.classList.toggle("is-current", isCurrent);
+    if (isCurrent) {
+      card.setAttribute("aria-current", "true");
+    } else {
+      card.removeAttribute("aria-current");
+    }
+  }
   elements.placeholder.hidden = true;
   elements.result.hidden = false;
-  elements.result.focus?.();
+  elements.result.focus();
   elements.result.scrollIntoView({ behavior: reducedMotion() ? "auto" : "smooth", block: "nearest" });
+}
+
+function createResultViewModel(result) {
+  const percentage = Math.round(result.addiction_probability * 1000) / 10;
+  const nonAddiction = Math.round(result.non_addiction_probability * 1000) / 10;
+  return Object.freeze({
+    percentage,
+    percentageLabel: `${percentage}%`,
+    nonAddictionLabel: `${nonAddiction}%`,
+    predictedClass: String(result.predicted_class),
+    riskLevel: result.risk_level,
+    riskLabel: `${result.risk_level} risk`,
+    message: result.risk_message,
+    modelVersion: result.model_version ?? "Not recorded",
+    gaugeText: `${percentage} percent, ${result.risk_level} risk display band`,
+    strokeDashoffset: 100 - percentage,
+    currentRiskCards: Object.freeze({
+      Low: result.risk_level === "Low",
+      Moderate: result.risk_level === "Moderate",
+      High: result.risk_level === "High",
+    }),
+  });
 }
 
 function handleReset() {
@@ -198,6 +237,14 @@ function handleReset() {
     const firstControl = elements.form.querySelector("input, select");
     firstControl?.focus();
   }, 0);
+}
+
+function startNewAssessment() {
+  elements.form.reset();
+  elements.form.scrollIntoView({
+    behavior: reducedMotion() ? "auto" : "smooth",
+    block: "start",
+  });
 }
 
 function setSubmitting(submitting) {
@@ -234,3 +281,5 @@ function humanize(name) {
 function reducedMotion() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
+
+window.SmartHabitPredictionDashboard = Object.freeze({ createResultViewModel });

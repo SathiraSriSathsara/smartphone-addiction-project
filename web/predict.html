@@ -123,19 +123,51 @@
             </form>
           </section>
 
-          <aside id="result-card" class="result-card" aria-labelledby="result-heading" hidden>
+          <aside
+            id="result-card"
+            class="result-card"
+            aria-labelledby="result-heading"
+            tabindex="-1"
+            hidden
+          >
             <div class="result-card__header">
-              <span>Model estimate</span>
+              <span>Educational model estimate</span>
               <span id="result-risk-badge" class="risk-badge">—</span>
             </div>
             <h3 id="result-heading">Your predicted likelihood</h3>
 
-            <div class="probability-ring" id="probability-ring" aria-hidden="true">
-              <div>
-                <strong id="result-probability">0%</strong>
-                <span>likelihood</span>
+            <figure class="probability-gauge">
+              <div
+                id="probability-gauge"
+                class="probability-gauge__visual"
+                role="progressbar"
+                aria-label="Predicted smartphone addiction likelihood"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                aria-valuenow="0"
+                aria-valuetext="0 percent, no result"
+              >
+                <svg viewBox="0 0 120 120" aria-hidden="true">
+                  <circle class="probability-gauge__track" cx="60" cy="60" r="52"></circle>
+                  <circle
+                    id="probability-gauge-progress"
+                    class="probability-gauge__progress"
+                    cx="60"
+                    cy="60"
+                    r="52"
+                    pathLength="100"
+                  ></circle>
+                </svg>
+                <div class="probability-gauge__value">
+                  <span>Predicted likelihood</span>
+                  <strong id="result-probability">0%</strong>
+                  <small id="result-gauge-risk">— risk</small>
+                </div>
               </div>
-            </div>
+              <figcaption>
+                Model probability, not clinical certainty
+              </figcaption>
+            </figure>
 
             <p id="result-message" class="result-card__message"></p>
             <dl class="result-card__details">
@@ -147,8 +179,40 @@
                 <dt>Non-addiction probability</dt>
                 <dd id="result-non-addiction">—</dd>
               </div>
+              <div>
+                <dt>Model version</dt>
+                <dd id="result-model-version">—</dd>
+              </div>
             </dl>
+
+            <section class="risk-guide" aria-labelledby="risk-guide-heading">
+              <div class="risk-guide__heading">
+                <h4 id="risk-guide-heading">Risk display thresholds</h4>
+                <p>Application bands only — they are not clinical thresholds.</p>
+              </div>
+              <div class="risk-guide__cards">
+                <article class="risk-info-card" data-risk="Low">
+                  <span class="risk-info-card__dot" aria-hidden="true"></span>
+                  <div><strong>Low</strong><small>Below 35%</small></div>
+                </article>
+                <article class="risk-info-card" data-risk="Moderate">
+                  <span class="risk-info-card__dot" aria-hidden="true"></span>
+                  <div><strong>Moderate</strong><small>35% to below 65%</small></div>
+                </article>
+                <article class="risk-info-card" data-risk="High">
+                  <span class="risk-info-card__dot" aria-hidden="true"></span>
+                  <div><strong>High</strong><small>65% and above</small></div>
+                </article>
+              </div>
+            </section>
+
             <p id="result-disclaimer" class="result-card__disclaimer"></p>
+            <button id="new-assessment-button" class="button button--new" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 12a8 8 0 1 0 2.3-5.7L4 8.6M4 4v4.6h4.6"></path>
+              </svg>
+              Start New Assessment
+            </button>
           </aside>
 
           <aside id="result-placeholder" class="result-placeholder" aria-hidden="true">
