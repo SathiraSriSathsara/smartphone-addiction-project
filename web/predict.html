@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+      name="description"
+      content="Estimate smartphone-addiction likelihood with the educational SmartHabit model."
+    >
+    <title>Predict Your Risk | SmartHabit</title>
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/prediction.css">
+    <script src="js/config.js" defer></script>
+    <script src="js/api.js" defer></script>
+    <script src="js/prediction.js" defer></script>
+  </head>
+  <body class="dashboard-page">
+    <a class="skip-link" href="#prediction-content">Skip to prediction form</a>
+
+    <div class="dashboard-shell">
+      <aside class="sidebar" aria-label="SmartHabit prediction guide">
+        <a class="sidebar__brand" href="index.html" aria-label="SmartHabit home">
+          <span class="sidebar__mark" aria-hidden="true">
+            <svg viewBox="0 0 48 58">
+              <rect x="4" y="2" width="40" height="54" rx="6"></rect>
+              <path d="M24 42.2 13.6 31.9a7.4 7.4 0 0 1 10.4-10.5 7.4 7.4 0 0 1 10.4 10.5Z"></path>
+              <path class="sidebar__speaker" d="M20 7h8"></path>
+            </svg>
+          </span>
+          <span>Smart<strong>Habit</strong></span>
+        </a>
+
+        <div class="sidebar__intro">
+          <p class="sidebar__eyebrow">Prediction workspace</p>
+          <h1>Understand your digital pattern.</h1>
+          <p>
+            Share a snapshot of your routine. SmartHabit will turn it into one
+            educational model estimate.
+          </p>
+        </div>
+
+        <ol class="sidebar__steps" aria-label="Prediction steps">
+          <li class="is-current">
+            <span>01</span>
+            <div><strong>Your habits</strong><small>Complete every field</small></div>
+          </li>
+          <li>
+            <span>02</span>
+            <div><strong>Model estimate</strong><small>Review your result</small></div>
+          </li>
+          <li>
+            <span>03</span>
+            <div><strong>Reflect</strong><small>Use it as a prompt, not a diagnosis</small></div>
+          </li>
+        </ol>
+
+        <div class="sidebar__privacy">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 3 4.5 6v5.8c0 4.7 3.1 7.7 7.5 9.2 4.4-1.5 7.5-4.5 7.5-9.2V6Z"></path>
+            <path d="m8.5 12 2.2 2.2 4.8-5"></path>
+          </svg>
+          <p><strong>Privacy focused</strong><br>Your entry is used only to request this prediction.</p>
+        </div>
+
+        <a class="sidebar__back" href="index.html">
+          <span aria-hidden="true">←</span> Back to home
+        </a>
+      </aside>
+
+      <main id="prediction-content" class="workspace">
+        <header class="workspace__header">
+          <div>
+            <p class="workspace__eyebrow">Smartphone Addiction Predictor</p>
+            <h2>Tell us about your smartphone habits</h2>
+            <p>All fields are required. Choose the answer that best reflects a typical day.</p>
+          </div>
+          <span class="workspace__badge">Educational AI</span>
+        </header>
+
+        <div class="workspace__notice" role="note">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"></circle>
+            <path d="M12 10v6M12 7h.01"></path>
+          </svg>
+          <p>
+            <strong>Not a medical diagnosis.</strong> This tool is a university
+            machine-learning prototype and cannot assess a psychological condition.
+          </p>
+        </div>
+
+        <div class="workspace__grid">
+          <section class="form-card" aria-labelledby="form-heading">
+            <div class="card-heading">
+              <div>
+                <span class="card-heading__number">01</span>
+                <h3 id="form-heading">Daily usage profile</h3>
+              </div>
+              <p id="schema-status" role="status" aria-live="polite">Loading model fields…</p>
+            </div>
+
+            <form id="prediction-form" novalidate>
+              <div id="form-error" class="form-alert" role="alert" hidden></div>
+              <div id="field-grid" class="field-grid" aria-busy="true">
+                <div class="field-skeleton"></div>
+                <div class="field-skeleton"></div>
+                <div class="field-skeleton"></div>
+                <div class="field-skeleton"></div>
+              </div>
+
+              <div class="form-actions">
+                <button id="reset-button" class="button button--secondary" type="reset" disabled>
+                  Reset form
+                </button>
+                <button id="submit-button" class="button button--primary" type="submit" disabled>
+                  <span class="button__label">Predict Your Risk</span>
+                  <span class="button__spinner" aria-hidden="true"></span>
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M5 12h14M14 7l5 5-5 5"></path>
+                  </svg>
+                </button>
+              </div>
+            </form>
+          </section>
+
+          <aside id="result-card" class="result-card" aria-labelledby="result-heading" hidden>
+            <div class="result-card__header">
+              <span>Model estimate</span>
+              <span id="result-risk-badge" class="risk-badge">—</span>
+            </div>
+            <h3 id="result-heading">Your predicted likelihood</h3>
+
+            <div class="probability-ring" id="probability-ring" aria-hidden="true">
+              <div>
+                <strong id="result-probability">0%</strong>
+                <span>likelihood</span>
+              </div>
+            </div>
+
+            <p id="result-message" class="result-card__message"></p>
+            <dl class="result-card__details">
+              <div>
+                <dt>Model class</dt>
+                <dd id="result-class">—</dd>
+              </div>
+              <div>
+                <dt>Non-addiction probability</dt>
+                <dd id="result-non-addiction">—</dd>
+              </div>
+            </dl>
+            <p id="result-disclaimer" class="result-card__disclaimer"></p>
+          </aside>
+
+          <aside id="result-placeholder" class="result-placeholder" aria-hidden="true">
+            <div class="result-placeholder__icon">
+              <svg viewBox="0 0 48 48">
+                <path d="M9 38V27h8v11M20 38V19h8v19M31 38V10h8v28"></path>
+                <path d="m8 20 10-8 7 3 15-10"></path>
+              </svg>
+            </div>
+            <h3>Your result will appear here</h3>
+            <p>Complete the form to generate one private, educational estimate.</p>
+          </aside>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
